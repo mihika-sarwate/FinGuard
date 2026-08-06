@@ -1,0 +1,130 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --void: #6A8EAF;
+  --surface: #FFFFFF;
+  --surface-raised: #F4F7FB;
+  --border: rgba(0, 0, 0, 0.08);
+  --border-strong: rgba(0, 0, 0, 0.15);
+  --border-card: rgba(0, 0, 0, 0.06);
+  --muted: rgba(255, 255, 255, 0.8);
+  --muted-dark: #475569;
+  --text: #FFFFFF;
+  --text-dark: #0F172A;
+  --accent: #1D4ED8;
+  --accent-glow: rgba(29, 78, 216, 0.3);
+  --accent-dim: #DBEAFE;
+  --safe: #22C55E;
+  --warn: #EAB308;
+  --threat: #EF4444;
+}
+
+.card {
+  border-radius: 16px;
+  border: 1px solid var(--border-card);
+  background: var(--surface);
+  backdrop-filter: blur(16px);
+  color: var(--text-dark);
+  --text: var(--text-dark);
+  --muted: var(--muted-dark);
+  --border: var(--border-card);
+  transition: border-color .2s, box-shadow .2s;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #98B5CF 0%, #6A8EAF 100%);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+.disp { font-family: 'Space Grotesk', sans-serif; }
+.mono { font-family: 'JetBrains Mono', monospace; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 8px; }
+
+a, button { font-family: inherit; }
+button { cursor: pointer; border: none; background: none; color: inherit; }
+a { color: var(--accent); text-decoration: none; transition: color 0.2s; }
+a:hover { color: var(--text); }
+
+::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+/* Animations */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise { animation: rise 0.3s ease-out; }
+
+#bg-container {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden;
+}
+.bg-base {
+  position: absolute; inset: 0;
+  background: none;
+}
+.bg-ambient-lights { position: absolute; inset: 0; }
+.bg-ambient-lights .light {
+  position: absolute; border-radius: 50%; filter: blur(80px);
+  background: rgba(255,255,255,0.15);
+  animation: ambientBreathe 10s infinite alternate ease-in-out;
+}
+.bg-ambient-lights .light-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; animation-delay: 0s; }
+.bg-ambient-lights .light-2 { top: -20%; right: 20%; width: 40vw; height: 40vw; animation-delay: -3s; }
+.bg-ambient-lights .light-3 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; animation-delay: -7s; }
+.bg-ambient-lights .light-hero { top: 20%; left: 30%; width: 800px; height: 800px; background: rgba(255,255,255,0.2); animation-duration: 12s; }
+@keyframes ambientBreathe {
+  0% { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(1.1); opacity: 1; }
+}
+
+.bg-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 1) 1px, transparent 1px);
+  background-size: 64px 64px;
+  background-position: center center;
+  opacity: 0.1;
+}
+.bg-grid-interactive {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 1) 1px, transparent 1px);
+  background-size: 64px 64px;
+  background-position: center center;
+  -webkit-mask-image: radial-gradient(ellipse var(--mask-width, 150px) var(--mask-height, 150px) at var(--mouse-x, 50vw) var(--mouse-y, 50vh), black 0%, transparent 100%);
+  mask-image: radial-gradient(ellipse var(--mask-width, 150px) var(--mask-height, 150px) at var(--mouse-x, 50vw) var(--mouse-y, 50vh), black 0%, transparent 100%);
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8)) drop-shadow(0 0 3px rgba(255, 255, 255, 1));
+}
+
+.bg-cursor-light {
+  position: absolute; inset: 0;
+  background: radial-gradient(circle 600px at var(--mouse-x, 50vw) var(--mouse-y, 50vh), rgba(255,255,255,0.2) 0%, transparent 100%);
+}
+
+#bg-particles { position: absolute; inset: 0; }
+
+.bg-vignette {
+  position: absolute; inset: 0;
+  box-shadow: inset 0 0 150px 50px rgba(106, 142, 175, 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-ambient-lights .light { animation: none !important; }
+  .bg-cursor-light { transition: none; }
+  .bg-cursor-light { background: radial-gradient(circle 600px at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 100%); }
+}
+
