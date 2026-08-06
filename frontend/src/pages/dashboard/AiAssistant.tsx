@@ -11,8 +11,6 @@ type ChatSession = { id: string; title: string; date: string; messages: Message[
 
 export const AiAssistant: React.FC = () => {
   const [apiKey, setApiKey] = useState(import.meta.env.VITE_GEMINI_API_KEY || '');
-  const [showKeyModal, setShowKeyModal] = useState(!import.meta.env.VITE_GEMINI_API_KEY);
-  const [tempKey, setTempKey] = useState('');
   
   const [inputText, setInputText] = useState('');
   const [attachedFile, setAttachedFile] = useState<{file: File, base64: string, mimeType: string} | null>(null);
@@ -82,7 +80,7 @@ export const AiAssistant: React.FC = () => {
   const handleSend = async () => {
     if (!inputText.trim() && !attachedFile) return;
     if (!apiKey) {
-      setShowKeyModal(true);
+      alert("API Key is missing. Please set VITE_GEMINI_API_KEY in your .env file or Vercel environment variables.");
       return;
     }
     
@@ -151,43 +149,12 @@ export const AiAssistant: React.FC = () => {
     }
   };
 
-  const handleSaveKey = () => {
-    if (tempKey.trim()) {
-      setApiKey(tempKey.trim());
-      setShowKeyModal(false);
-    }
-  };
+
 
   return (
     <div style={{ display: 'flex', gap: '24px', height: 'calc(100vh - 120px)' }}>
       
-      {/* API Key Modal Overlay */}
-      {showKeyModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <div className="card" style={{ width: '400px', padding: '24px', background: 'var(--surface)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <Key color="var(--accent)" />
-              <h2 style={{ margin: 0, fontSize: '18px' }}>Google Gemini API Key Required</h2>
-            </div>
-            <p style={{ margin: 0, fontSize: '14px', color: 'var(--muted-dark)' }}>
-              To connect the actual LLM engine, please provide your Gemini API key. This key is stored only in memory for this session.
-            </p>
-            <input 
-              type="password" 
-              placeholder="AIzaSy..." 
-              value={tempKey}
-              onChange={e => setTempKey(e.target.value)}
-              style={{ padding: '12px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--surface-raised)', outline: 'none' }}
-            />
-            <button 
-              onClick={handleSaveKey}
-              style={{ padding: '12px', background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600 }}
-            >
-              Connect LLM
-            </button>
-          </div>
-        </div>
-      )}
+      {/* API Key Modal Removed */}
 
       {/* Left: Chat History */}
       <div className="card" style={{ width: '250px', display: 'flex', flexDirection: 'column', padding: '16px' }}>
@@ -222,9 +189,6 @@ export const AiAssistant: React.FC = () => {
               <p style={{ margin: 0, fontSize: '12px', color: 'var(--safe)', display: 'flex', alignItems: 'center', gap: '4px' }}><CheckCircle2 size={12} /> LLM Connected</p>
             </div>
           </div>
-          <button onClick={() => setShowKeyModal(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--muted-dark)' }}>
-            <Key size={16} />
-          </button>
         </div>
 
         {/* Chat Area */}
