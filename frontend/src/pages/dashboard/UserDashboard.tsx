@@ -8,6 +8,10 @@ import {
   Tooltip as RechartsTooltip, ResponsiveContainer
 } from 'recharts';
 
+import { useState, useEffect } from 'react';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../contexts/AuthContext';
+
 const chartData = [
   { name: 'Jan', balance: 220000 },
   { name: 'Feb', balance: 235000 },
@@ -19,6 +23,29 @@ const chartData = [
 ];
 
 export const UserDashboard: React.FC = () => {
+  const { user } = useAuth();
+  const [balance, setBalance] = useState<number | null>(284000);
+
+  const fetchBalance = async () => {
+    if (!user?.id) return;
+    const { data } = await supabase
+      .from('accounts')
+      .select('balance')
+      .eq('user_id', user.id)
+      .single();
+    if (data && data.balance !== undefined) {
+      setBalance(Number(data.balance));
+    }
+  };
+
+  useEffect(() => {
+    fetchBalance();
+    window.addEventListener('mockDataUpdated', fetchBalance);
+    return () => window.removeEventListener('mockDataUpdated', fetchBalance);
+  }, [user?.id]);
+
+  const formattedBalance = balance !== null ? `₹${balance.toLocaleString('en-IN')}` : '₹2,84,000';
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
@@ -29,7 +56,7 @@ export const UserDashboard: React.FC = () => {
 
       {/* KPI Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '20px' }}>
-        <MetricCard title="Total Balance" value="₹2,84,000" icon={<Wallet size={24} color="var(--accent)" />} color="var(--accent)" />
+        <MetricCard title="Total Balance" value={formattedBalance} icon={<Wallet size={24} color="var(--accent)" />} color="var(--accent)" />
         <MetricCard title="Spent (This Month)" value="₹34,000" icon={<TrendingDown size={24} color="var(--threat)" />} color="var(--threat)" />
         <MetricCard title="Saved (This Month)" value="₹18,000" icon={<TrendingUp size={24} color="var(--safe)" />} color="var(--safe)" />
         <MetricCard title="Trust Score" value="96%" icon={<ShieldCheck size={24} color="var(--safe)" />} color="var(--safe)" />
