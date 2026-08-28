@@ -21,23 +21,32 @@ export const Login: React.FC = () => {
     setErrorMsg('');
     setIsLoading(true);
 
-    // Auto-login configuration for Admin & Demo User (Handles unconfirmed email state)
-    if (email === 'admin@finguard.ai' && password === 'admin123') {
-      localStorage.setItem('magic_admin', 'true');
-      window.location.href = '/admin/dashboard';
-      return;
-    }
-    
-    if (email === 'user@finguard.ai' && password === 'user123') {
-      localStorage.setItem('magic_user', 'true');
-      window.location.href = '/dashboard';
-      return;
-    }
-
-    const { error } = await supabase.auth.signInWithPassword({
+    let { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+
+    // Auto-signup fallback for demo credentials if not yet registered in Supabase
+    if (error && (email === 'user@finguard.ai' || email === 'admin@finguard.ai')) {
+      const isDemoAdmin = email === 'admin@finguard.ai';
+      const signUpRes = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            full_name: isDemoAdmin ? 'System Administrator' : 'Demo User'
+          }
+        }
+      });
+
+      if (!signUpRes.error) {
+        if (isDemoAdmin && signUpRes.data.user) {
+          await supabase.from('profiles').update({ role: 'admin' }).eq('id', signUpRes.data.user.id);
+        }
+        const retrySignIn = await supabase.auth.signInWithPassword({ email, password });
+        error = retrySignIn.error;
+      }
+    }
 
     setIsLoading(false);
 

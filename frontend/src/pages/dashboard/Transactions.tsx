@@ -6,7 +6,8 @@ import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, 
   Tooltip as RechartsTooltip, ResponsiveContainer, Legend
 } from 'recharts';
-import { getMockData } from '../../lib/gemini';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 
 const categoryData = [
   { name: 'Food', value: 12500, color: '#f97316' },
@@ -24,16 +25,31 @@ const monthlySpending = [
 ];
 
 export const Transactions: React.FC = () => {
+  const { user } = useAuth();
   const [activeFilter, setActiveFilter] = useState('All');
-  const [data, setData] = useState(getMockData());
+  const [transactions, setTransactions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchTransactions = async () => {
+    if (!user?.id) return;
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('transactions')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('occurred_at', { ascending: false });
+
+    if (!error && data) {
+      setTransactions(data);
+    }
+    setLoading(false);
+  };
 
   React.useEffect(() => {
-    const handleUpdate = () => {
-      setData(getMockData());
-    };
-    window.addEventListener('mockDataUpdated', handleUpdate);
-    return () => window.removeEventListener('mockDataUpdated', handleUpdate);
-  }, []);
+    fetchTransactions();
+    window.addEventListener('mockDataUpdated', fetchTransactions);
+    return () => window.removeEventListener('mockDataUpdated', fetchTransactions);
+  }, [user?.id]);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
@@ -96,18 +112,23 @@ export const Transactions: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {data.transactions.map((tx: any, idx: number) => (
-                  <TransactionRow 
-                    key={idx}
-                    date={tx.date} 
-                    merchant={tx.description} 
-                    category={tx.category} 
-                    amount={`${tx.amount > 0 ? '+' : '-'}₹${Math.abs(tx.amount).toLocaleString('en-IN')}`} 
-                    type={tx.type === 'credit' ? 'income' : 'expense'} 
-                    status="Completed" 
-                    isAI={tx.isAI} 
-                  />
-                ))}
+                {transactions.map((tx: any, idx: number) => {
+                  const formattedDate = tx.occurred_at
+                    ? new Date(tx.occurred_at).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                    : tx.date || 'Recent';
+                  return (
+                    <TransactionRow 
+                      key={tx.id || idx}
+                      date={formattedDate} 
+                      merchant={tx.description} 
+                      category={tx.category} 
+                      amount={`${tx.amount > 0 ? '+' : '-'}₹${Math.abs(tx.amount).toLocaleString('en-IN')}`} 
+                      type={tx.type === 'credit' ? 'income' : 'expense'} 
+                      status="Completed" 
+                      isAI={tx.is_ai || tx.isAI} 
+                    />
+                  );
+                })}
               </tbody>
             </table>
           </div>

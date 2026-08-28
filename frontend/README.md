@@ -1,32 +1,30 @@
-# React + TypeScript + Vite
+# 🛡️ FinGuard Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+This directory contains the single-page web application for **FinGuard**, built with **React 19**, **TypeScript**, **Vite**, **Tailwind CSS**, and **Supabase**.
 
-Currently, two official plugins are available:
+For complete project documentation, database setup scripts, architectural overview, and deployment guides, please refer to the main [Root README](../README.md).
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Local Development
 
-## React Compiler
+```bash
+# Install dependencies
+npm install
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+# Start local dev server (http://localhost:5173)
+npm run dev
 
-## Expanding the Oxlint configuration
+# Build for production
+npm run build
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+# Run Oxlint checks
+npm run lint
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+## 🗝️ Environment Variables
+
+Ensure `.env` contains:
+```env
+VITE_SUPABASE_URL=https://your-supabase-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-supabase-anon-key
+VITE_GEMINI_API_KEY=your-google-gemini-api-key
+```

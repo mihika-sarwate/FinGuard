@@ -1,10 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Wallet, Plus, Link as LinkIcon, Download, 
   Snowflake, ArrowDown, ArrowUp, CreditCard
 } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 
 export const Accounts: React.FC = () => {
+  const { user } = useAuth();
+  const [balance, setBalance] = useState<number | null>(284000);
+
+  const fetchBalance = async () => {
+    if (!user?.id) return;
+    const { data } = await supabase
+      .from('accounts')
+      .select('balance')
+      .eq('user_id', user.id)
+      .single();
+    if (data && data.balance !== undefined) {
+      setBalance(Number(data.balance));
+    }
+  };
+
+  useEffect(() => {
+    fetchBalance();
+    window.addEventListener('mockDataUpdated', fetchBalance);
+    return () => window.removeEventListener('mockDataUpdated', fetchBalance);
+  }, [user?.id]);
+
+  const formattedBalance = balance !== null ? `₹${balance.toLocaleString('en-IN')}` : '₹2,84,000';
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       
@@ -24,7 +49,7 @@ export const Accounts: React.FC = () => {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
-        <SummaryCard title="Total Balance" value="₹2,84,000" icon={<Wallet size={20} color="var(--accent)" />} color="var(--accent)" />
+        <SummaryCard title="Total Balance" value={formattedBalance} icon={<Wallet size={20} color="var(--accent)" />} color="var(--accent)" />
         <SummaryCard title="Total Savings" value="₹82,540" icon={<ArrowUp size={20} color="var(--safe)" />} color="var(--safe)" />
         <SummaryCard title="Monthly Income" value="₹1,25,000" icon={<ArrowDown size={20} color="var(--safe)" />} color="var(--safe)" />
         <SummaryCard title="Monthly Expenses" value="₹34,000" icon={<CreditCard size={20} color="var(--threat)" />} color="var(--threat)" />

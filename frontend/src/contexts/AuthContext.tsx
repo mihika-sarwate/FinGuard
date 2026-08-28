@@ -25,27 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Auto-login configuration for Admin (Handles unconfirmed email state)
-    if (localStorage.getItem('magic_admin') === 'true') {
-      const magicUser = { id: 'magic-admin-id', email: 'admin@finguard.ai' } as User;
-      setSession({ user: magicUser } as Session);
-      setUser(magicUser);
-      setRole('admin');
-      setIsLoading(false);
-      return;
-    }
-    
-    // Auto-login configuration for Demo User
-    if (localStorage.getItem('magic_user') === 'true') {
-      const magicUser = { id: 'magic-user-id', email: 'user@finguard.ai' } as User;
-      setSession({ user: magicUser } as Session);
-      setUser(magicUser);
-      setRole('user');
-      setIsLoading(false);
-      return;
-    }
-
-    // Fetch initial session
+    // Fetch initial session from Supabase
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
@@ -56,10 +36,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     });
 
-    // Listen for auth changes
+    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (localStorage.getItem('magic_admin') === 'true') return;
-      
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -84,7 +62,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!error && data) {
         setRole(data.role as 'admin' | 'user');
       } else {
-        // Fallback bypass for RLS infinite recursion blocks
+        // Fallback check based on email
         if (email === 'admin@finguard.ai' || email === 'superadmin@finguard.ai') {
           setRole('admin');
         } else {

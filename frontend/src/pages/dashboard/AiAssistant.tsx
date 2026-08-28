@@ -4,12 +4,14 @@ import {
   QrCode, Mail, Activity, CheckCircle2, Key, AlertTriangle, X
 } from 'lucide-react';
 import { FinGuardAgent } from '../../lib/gemini';
+import { useAuth } from '../../contexts/AuthContext';
 
 type Message = { id: string; role: 'user' | 'agent'; text: string };
 type Trace = { id: string; title: string; desc: string; highlight?: boolean; status?: 'active' | 'done' | 'threat' };
 type ChatSession = { id: string; title: string; date: string; messages: Message[] };
 
 export const AiAssistant: React.FC = () => {
+  const { user } = useAuth();
   const [apiKey, setApiKey] = useState(import.meta.env.VITE_GEMINI_API_KEY || '');
   
   const [inputText, setInputText] = useState('');
@@ -38,14 +40,14 @@ export const AiAssistant: React.FC = () => {
   const agentRef = useRef<FinGuardAgent | null>(null);
   
   useEffect(() => {
-    if (apiKey) {
-      // Build history for SDK (excluding initial agent greeting if it's the first message, as API expects user to start)
+    if (apiKey && user?.id) {
+      // Build history for SDK
       const apiHistory = messages.filter((m, i) => !(i === 0 && m.role === 'agent')).map(m => ({
         role: m.role === 'agent' ? 'model' : 'user',
         parts: [{ text: m.text }]
       }));
       
-      agentRef.current = new FinGuardAgent(apiKey, (trace) => {
+      agentRef.current = new FinGuardAgent(apiKey, user.id, (trace) => {
         setTraces(prev => {
           const existing = prev.find(t => t.id === trace.id);
           if (existing) {
@@ -55,7 +57,7 @@ export const AiAssistant: React.FC = () => {
         });
       }, apiHistory);
     }
-  }, [apiKey, activeSessionId]); // Re-init agent when switching sessions
+  }, [apiKey, activeSessionId, user?.id]); // Re-init agent when switching sessions
 
   // Save sessions to localStorage whenever they change
   useEffect(() => {
